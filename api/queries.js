@@ -21,25 +21,11 @@ var db = pgp(connectionString);
 // Query Functions
 /////////////////////
 
-function getAllStarships(req, res, next) {
-  db.any('SELECT * FROM starships')
-    .then(function (data) {
-      res.status(200)
-        .json({
-          status: 'success',
-          data: data,
-          message: 'Retrieved all starships'
-        });
-    })
-    .catch(function (err) {
-      return next(err);
-    });
-}
 
 function getAllUsers(req, res, next) {
-  db.any('SELECT id, name	FROM "DM"."USER"')
+  db.any('SELECT id, name	FROM dm."user"')
     .then(function (data) {
-       res.status(200)
+      res.status(200)
         .json({
           status: 'success',
           data: data
@@ -52,7 +38,7 @@ function getAllUsers(req, res, next) {
 
 function getUser(req, res, next) {
   var id = parseInt(req.params.id);
-  db.one('SELECT id, name	FROM "DM"."user" WHERE id = $1', id)
+  db.one('SELECT id, name	FROM dm."user" WHERE id = $1', id)
     .then(function (data) {
       res.status(200)
         .json({
@@ -66,32 +52,27 @@ function getUser(req, res, next) {
     });
 }
 
-function getStarship(req, res, next) {
-  var id = parseInt(req.params.id);
-  db.one('SELECT * FROM starships WHERE id = $1', id)
-    .then(function (data) {
-      res.status(200)
-        .json({
+function createUser(req, res, next) {
+  var name = req.body.name;
+  db.none('INSERT INTO dm."user"(name) values($1)', name).then(function () {
+      res.status(200).json({
           status: 'success',
-          data: data,
-          message: 'Retrieved one starship'
+          message: 'Inserted'
         });
-    })
-    .catch(function (err) {
+    }).catch(function (err) {
       return next(err);
     });
 }
 
-function createStarship(req, res, next) {
-  req.body.launched = parseInt(req.body.launched);
-  db.none('INSERT INTO starships(name, registry, affiliation, launched, class, captain)' +
-      'values(${name}, ${registry}, ${affiliation}, ${launched}, ${class}, ${captain})',
-    req.body)
+function updateUser(req, res, next) {
+  var id = parseInt(req.params.id);
+  var name = req.body.name;
+  db.none('UPDATE dm."user" SET name=$2 WHERE id = $1', [id, name])
     .then(function () {
       res.status(200)
         .json({
           status: 'success',
-          message: 'Inserted one starship'
+          message: 'Updated'
         });
     })
     .catch(function (err) {
@@ -99,32 +80,15 @@ function createStarship(req, res, next) {
     });
 }
 
-function updateStarship(req, res, next) {
-  db.none('UPDATE starships SET name=$1, registry=$2, affiliation=$3, launched=$4, class=$5, captain=$6 where id=$7',
-    [req.body.name, req.body.registry, req.body.affiliation, parseInt(req.body.launched), req.body.class, parseInt(req.params.id)])
-    .then(function () {
-      res.status(200)
-        .json({
-          status: 'success',
-          message: 'Updated starship'
-        });
-    })
-    .catch(function (err) {
-      return next(err);
-    });
-}
-
-function removeStarship(req, res, next) {
+function removeUser(req, res, next) {
   var id = parseInt(req.params.id);
-  db.result('DELETE FROM starships WHERE id = $1', id)
+  db.result('DELETE FROM dm."user" WHERE id = $1', id)
     .then(function (result) {
-      /* jshint ignore:start */
       res.status(200)
         .json({
           status: 'success',
-          message: 'Removed ${result.rowCount} starships'
+          message: 'Removed'
         });
-      /* jshint ignore:end */
     })
     .catch(function (err) {
       return next(err);
@@ -137,11 +101,9 @@ function removeStarship(req, res, next) {
 /////////////
 
 module.exports = {
-    getAllStarships: getAllStarships,
-    getStarship: getStarship,
-    createStarship: createStarship,
-    updateStarship: updateStarship,
-    removeStarship: removeStarship,
-    getAllUsers: getAllUsers,
-    getUser: getUser
+  createUser: createUser,
+  updateUser: updateUser,
+  removeUser: removeUser,
+  getAllUsers: getAllUsers,
+  getUser: getUser
 };
