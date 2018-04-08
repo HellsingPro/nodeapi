@@ -6,7 +6,14 @@ var options = {
 };
 
 var pgp = require('pg-promise')(options);
-var connectionString = 'postgres://localhost:5432/startrek'; // startrek is an example database name
+var connectionString = {
+  host: 'localhost', // server name or IP address;
+  port: 5432,
+  database: 'TreinamentoDB',
+  user: 'postgres',
+  password: 'postgres'
+};
+
 var db = pgp(connectionString);
 
 
@@ -22,6 +29,36 @@ function getAllStarships(req, res, next) {
           status: 'success',
           data: data,
           message: 'Retrieved all starships'
+        });
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
+
+function getAllUsers(req, res, next) {
+  db.any('SELECT id, name	FROM "DM"."USER"')
+    .then(function (data) {
+       res.status(200)
+        .json({
+          status: 'success',
+          data: data
+        });
+    })
+    .catch(function (err) {
+      return next(err, 'erro');
+    });
+}
+
+function getUser(req, res, next) {
+  var id = parseInt(req.params.id);
+  db.one('SELECT id, name	FROM "DM"."user" WHERE id = $1', id)
+    .then(function (data) {
+      res.status(200)
+        .json({
+          status: 'success',
+          data: data,
+          message: 'Retrieved one starship'
         });
     })
     .catch(function (err) {
@@ -104,5 +141,7 @@ module.exports = {
     getStarship: getStarship,
     createStarship: createStarship,
     updateStarship: updateStarship,
-    removeStarship: removeStarship
+    removeStarship: removeStarship,
+    getAllUsers: getAllUsers,
+    getUser: getUser
 };

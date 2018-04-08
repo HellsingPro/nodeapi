@@ -18,6 +18,8 @@ router.get('/', function(req, res, next) {
 
 var db = require('./queries');
 
+router.get('/api/users', db.getAllUsers);
+router.get('/api/user/:id', db.getUser);
 router.get('/api/starships', db.getAllStarships);
 router.get('/api/starships/:id', db.getStarship);
 router.post('/api/starships', db.createStarship);
