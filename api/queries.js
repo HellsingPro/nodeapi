@@ -91,7 +91,6 @@ function removeUser(req, res, next) {
     });
 }
 
-
 /////////////
 // Exports
 /////////////
